@@ -16,8 +16,8 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     // al más viejo
     List<Pedido> findByClienteDniOrderByFechaDesc(String dni);
 
-    // CU-04: pedidos del cliente, del más nuevo al más viejo (RN-25).
-    // Los filtros son opcionales (FA-01): si un parámetro llega null, esa
+    // CU-04: pedidos del cliente, del más nuevo al más viejo
+    // Los filtros son opcionales: si un parámetro llega null, esa
     // condición no filtra nada.
     @Query("""
             SELECT p FROM Pedido p
