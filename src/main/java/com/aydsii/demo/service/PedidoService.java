@@ -69,30 +69,23 @@ public class PedidoService {
                 pedido.getMotivoCancelacion(), historial);
     }
 
-    // -----------------------------------------------------------
-    // ------ CU-04: CONSULTAR HISTORIAL DE PEDIDOS
-    // -----------------------------------------------------------
-    // Sigue el diagrama de secuencia: valida, busca los pedidos y, por cada
-    // pedido, arma sus ítems (loop externo) calculando el subtotal de cada
-    // línea (loop interno). estado, desde y hasta son filtros opcionales.
+    // CU-04: CONSULTAR HISTORIAL DE PEDIDOS
+
     public List<PedidoDetalleDTO> consultarHistorialPedidos(String dni, TipoEstado estado,
             LocalDate desde, LocalDate hasta) {
 
-        // FE-02: primero las fechas, porque no necesitan consultar la base
+        // primero las fechas, porque no necesitan consultar la base
         validarRangoFechas(desde, hasta);
 
-        // RN-22 / FE-01: el cliente tiene que existir
+        // el cliente tiene que existir
         if (!clienteRepository.existsById(dni)) {
             throw new ClienteNoEncontradoException(dni);
         }
 
-        // el repositorio trabaja con fecha y hora: "desde" arranca a las 00:00 y
-        // "hasta" se pasa al día siguiente a las 00:00 (la query usa <), así
-        // entra todo el día "hasta"
         LocalDateTime inicio = (desde != null) ? desde.atStartOfDay() : null;
         LocalDateTime fin = (hasta != null) ? hasta.plusDays(1).atStartOfDay() : null;
 
-        // RN-25: vienen ordenados del más nuevo al más viejo
+        // vienen ordenados del más nuevo al más viejo
         List<Pedido> pedidos = pedidoRepository.buscarHistorial(dni, estado, inicio, fin);
         List<PedidoDetalleDTO> resultado = new ArrayList<>();
 
@@ -117,11 +110,11 @@ public class PedidoService {
                     pedido.getModoEntrega(), pedido.getValorTotal(), items));
         }
 
-        // FA-02 / FA-03: si no hay pedidos se devuelve la lista vacía
+        // si no hay pedidos se devuelve la lista vacía
         return resultado;
     }
 
-    // FE-02: si vienen las dos fechas, "desde" no puede ser posterior a "hasta"
+    // si vienen las dos fechas, "desde" no puede ser posterior a "hasta"
     private void validarRangoFechas(LocalDate desde, LocalDate hasta) {
         if (desde != null && hasta != null && desde.isAfter(hasta)) {
             throw new RangoFechasInvalidoException(
@@ -129,8 +122,8 @@ public class PedidoService {
         }
     }
 
-    // RN-26: subtotal = cantidad de packs x precio unitario - descuento aplicado
-    // (el precio es el guardado en el pedido, no el actual del producto: RN-21)
+    // subtotal = cantidad de packs x precio unitario - descuento aplicado
+
     private double calcularSubtotal(DetallePedido detalle) {
         int descuento = (detalle.getDescuentoAplicado() != null) ? detalle.getDescuentoAplicado() : 0;
         return detalle.getCantidad() * detalle.getPrecioUnitario() - descuento;
