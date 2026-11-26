@@ -27,6 +27,14 @@ public class ManejoErrores {
         return ResponseEntity.status(status).body(ApiResponse.error(status, e.getMessage()));
     }
 
+    // CU-04 (FE-02): la fecha "desde" del filtro es posterior a la fecha "hasta".
+    // Responde 400 (Bad Request): el problema está en lo que envió el cliente.
+    @ExceptionHandler(RangoFechasInvalidoException.class)
+    public ResponseEntity<ApiResponse<Void>> rangoFechasInvalido(RangoFechasInvalidoException e) {
+        int status = HttpStatus.BAD_REQUEST.value();
+        return ResponseEntity.status(status).body(ApiResponse.error(status, e.getMessage()));
+    }
+
     // CU-01: se lanza cuando el DNI del vendedor que carga la promoción no existe.
     // Responde 404.
     @ExceptionHandler(UsuarioNoEncontradoException.class)
