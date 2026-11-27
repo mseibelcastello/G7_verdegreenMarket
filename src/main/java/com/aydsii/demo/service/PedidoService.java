@@ -1,5 +1,7 @@
 package com.aydsii.demo.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.aydsii.demo.model.dto.CambioEstadoDTO;
@@ -16,15 +18,21 @@ import com.aydsii.demo.repository.DetallePedidoRepository;
 import com.aydsii.demo.repository.HistorialEstadoRepository;
 import com.aydsii.demo.repository.PedidoRepository;
 import com.aydsii.demo.exception.*;
+import com.aydsii.demo.util.FormatoFecha;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class PedidoService {
+
+    // SLF4J (Simple Logging Facade): el código escribe contra la interfaz Logger
+    // de org.slf4j y no sabe qué librería registra de verdad. En este proyecto
+    // por debajo está Log4j2 (log4j2-spring.xml): consola y logs/demo.log.
+    // Es static final: un solo logger para toda la clase.
+    private static final Logger log = LoggerFactory.getLogger(PedidoService.class);
 
     private final PedidoRepository pedidoRepository;
     private final ClienteRepository clienteRepository;
@@ -75,11 +83,19 @@ public class PedidoService {
     public List<PedidoDetalleDTO> consultarHistorialPedidos(String dni, TipoEstado estado,
             LocalDate desde, LocalDate hasta) {
 
+        FormatoFecha formato = FormatoFecha.getInstance(); // Singleton
+
+        // los {} se reemplazan por los argumentos en orden: el mensaje solo se
+        // arma si ese nivel de log está activo
+        log.info("CU-04 consultar historial: dni={}, estado={}, desde={}, hasta={}",
+                dni, estado, formato.formatear(desde), formato.formatear(hasta));
+
         // primero las fechas, porque no necesitan consultar la base
         validarRangoFechas(desde, hasta);
 
         // el cliente tiene que existir
         if (!clienteRepository.existsById(dni)) {
+            log.warn("CU-04 historial rechazado: no existe el cliente con dni={}", dni);
             throw new ClienteNoEncontradoException(dni);
         }
 
@@ -107,9 +123,13 @@ public class PedidoService {
                         subtotal));
             }
 
+            log.debug("CU-04 pedido {}: {} producto(s)", pedido.getId(), items.size());
+
             resultado.add(new PedidoDetalleDTO(pedido.getId(), pedido.getFecha(), pedido.getEstado(),
                     pedido.getModoEntrega(), pedido.getValorTotal(), items));
         }
+
+        log.info("CU-04 historial dni={}: {} pedido(s) encontrado(s)", dni, resultado.size());
 
         // si no hay pedidos se devuelve la lista vacía
         return resultado;
@@ -118,10 +138,11 @@ public class PedidoService {
     // si vienen las dos fechas, "desde" no puede ser posterior a "hasta"
     private void validarRangoFechas(LocalDate desde, LocalDate hasta) {
         if (desde != null && hasta != null && desde.isAfter(hasta)) {
-            DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-            throw new RangoFechasInvalidoException(
-                    "La fecha desde (" + desde.format(f) + ") no puede ser posterior a la fecha hasta ("
-                            + hasta.format(f) + ")");
+            FormatoFecha formato = FormatoFecha.getInstance(); // Singleton
+            String mensaje = "La fecha desde (" + formato.formatear(desde)
+                    + ") no puede ser posterior a la fecha hasta (" + formato.formatear(hasta) + ")";
+            log.warn("CU-04 historial rechazado: {}", mensaje);
+            throw new RangoFechasInvalidoException(mensaje);
         }
     }
 
