@@ -19,6 +19,7 @@ import com.aydsii.demo.exception.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,8 +118,10 @@ public class PedidoService {
     // si vienen las dos fechas, "desde" no puede ser posterior a "hasta"
     private void validarRangoFechas(LocalDate desde, LocalDate hasta) {
         if (desde != null && hasta != null && desde.isAfter(hasta)) {
+            DateTimeFormatter f = DateTimeFormatter.ofPattern("dd-MM-yyyy");
             throw new RangoFechasInvalidoException(
-                    "La fecha desde (" + desde + ") no puede ser posterior a la fecha hasta (" + hasta + ")");
+                    "La fecha desde (" + desde.format(f) + ") no puede ser posterior a la fecha hasta ("
+                            + hasta.format(f) + ")");
         }
     }
 

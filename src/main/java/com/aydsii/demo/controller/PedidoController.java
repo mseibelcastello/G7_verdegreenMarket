@@ -27,54 +27,55 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Tag(name = "Pedidos", description = "Consulta de pedidos y su estado")
 public class PedidoController {
 
-    private final PedidoService pedidoService;
+        private final PedidoService pedidoService;
 
-    public PedidoController(PedidoService pedidoService) {
-        this.pedidoService = pedidoService;
-    }
+        public PedidoController(PedidoService pedidoService) {
+                this.pedidoService = pedidoService;
+        }
 
-    // -----------------------------------------------------------
-    // ------LISTAR TODOS LOS PEDIDOS DEL CLIENTE POR DNI
-    // -----------------------------------------------------------
-    @Operation(summary = "Listar pedidos del cliente", description = "Devuelve los pedidos del cliente con su estado actual, del más nuevo al más viejo")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Lista de pedidos (vacía si el cliente no tiene)"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No existe un cliente con ese DNI")
-    })
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<PedidoResumenDTO>>> listarPedidos(
-            @Parameter(description = "DNI del cliente") @RequestParam String dni) {
-        return ResponseEntity.ok(ApiResponse.ok(pedidoService.listarPedidos(dni)));
-    }
+        // -----------------------------------------------------------
+        // ------LISTAR TODOS LOS PEDIDOS DEL CLIENTE POR DNI
+        // -----------------------------------------------------------
+        @Operation(summary = "Listar pedidos del cliente", description = "Devuelve los pedidos del cliente con su estado actual, del más nuevo al más viejo")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Lista de pedidos (vacía si el cliente no tiene)"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No existe un cliente con ese DNI")
+        })
+        @GetMapping
+        public ResponseEntity<ApiResponse<List<PedidoResumenDTO>>> listarPedidos(
+                        @Parameter(description = "DNI del cliente") @RequestParam String dni) {
+                return ResponseEntity.ok(ApiResponse.ok(pedidoService.listarPedidos(dni)));
+        }
 
-    // ------------------------------------------------------------------
-    // ------LISTAR EL HISTORIAL DE ESTADOS DE PEDIDOS POR ID DE PEDIDO
-    // -----------------------------------------------------------------
-    @Operation(summary = "Consultar historial de un pedido", description = "Devuelve el estado actual del pedido y todos sus cambios de estado, del más viejo al más nuevo")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Historial del pedido"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No existe un pedido con ese número")
-    })
-    @GetMapping("/{id}/historial") // se identifica un recurso concreto
-    public ResponseEntity<ApiResponse<HistorialPedidoDTO>> consultarHistorial(
-            @Parameter(description = "Número del pedido") @PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(pedidoService.consultarHistorial(id)));
-    }
+        // ------------------------------------------------------------------
+        // ------LISTAR EL HISTORIAL DE ESTADOS DE PEDIDOS POR ID DE PEDIDO
+        // -----------------------------------------------------------------
+        @Operation(summary = "Consultar historial de un pedido", description = "Devuelve el estado actual del pedido y todos sus cambios de estado, del más viejo al más nuevo")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Historial del pedido"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No existe un pedido con ese número")
+        })
+        @GetMapping("/{id}/historial") // se identifica un recurso concreto
+        public ResponseEntity<ApiResponse<HistorialPedidoDTO>> consultarHistorial(
+                        @Parameter(description = "Número del pedido") @PathVariable Long id) {
+                return ResponseEntity.ok(ApiResponse.ok(pedidoService.consultarHistorial(id)));
+        }
 
-    // ------ CU-04: CONSULTAR HISTORIAL DE PEDIDOS (con detalle de productos)
-    @Operation(summary = "Consultar historial de pedidos", description = "Devuelve los pedidos del cliente con el detalle de los productos comprados, "
-            + "del más nuevo al más viejo. Se puede filtrar por estado y/o rango de fechas.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Historial de pedidos (vacío si no hay pedidos o ninguno cumple el filtro)"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "La fecha desde es posterior a la fecha hasta"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No existe un cliente con ese DNI")
-    })
-    @GetMapping("/historial")
-    public ResponseEntity<ApiResponse<List<PedidoDetalleDTO>>> consultarHistorialPedidos(
-            @Parameter(description = "DNI del cliente") @RequestParam String dni,
-            @Parameter(description = "Filtrar por estado (opcional)") @RequestParam(required = false) TipoEstado estado,
-            @Parameter(description = "Desde esta fecha, formato AAAA-MM-DD (opcional)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-            @Parameter(description = "Hasta esta fecha inclusive, formato AAAA-MM-DD (opcional)") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return ResponseEntity.ok(ApiResponse.ok(pedidoService.consultarHistorialPedidos(dni, estado, desde, hasta)));
-    }
+        // ------ CU-04: CONSULTAR HISTORIAL DE PEDIDOS (con detalle de productos)
+        @Operation(summary = "Consultar historial de pedidos", description = "Devuelve los pedidos del cliente con el detalle de los productos comprados, "
+                        + "del más nuevo al más viejo. Se puede filtrar por estado y/o rango de fechas.")
+        @ApiResponses({
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Historial de pedidos (vacío si no hay pedidos o ninguno cumple el filtro)"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "La fecha desde es posterior a la fecha hasta"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No existe un cliente con ese DNI")
+        })
+        @GetMapping("/historial")
+        public ResponseEntity<ApiResponse<List<PedidoDetalleDTO>>> consultarHistorialPedidos(
+                        @Parameter(description = "DNI del cliente") @RequestParam String dni,
+                        @Parameter(description = "Filtrar por estado (opcional)") @RequestParam(required = false) TipoEstado estado,
+                        @Parameter(description = "Desde esta fecha, formato DD-MM-AAAA (opcional)", example = "01-11-2026") @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy", fallbackPatterns = "yyyy-MM-dd") LocalDate desde,
+                        @Parameter(description = "Hasta esta fecha inclusive, formato DD-MM-AAAA (opcional)", example = "30-11-2026") @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy", fallbackPatterns = "yyyy-MM-dd") LocalDate hasta) {
+                return ResponseEntity.ok(ApiResponse
+                                .ok(pedidoService.consultarHistorialPedidos(dni, estado, desde, hasta)));
+        }
 }

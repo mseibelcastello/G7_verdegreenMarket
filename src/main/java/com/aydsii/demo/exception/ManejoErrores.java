@@ -5,10 +5,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import com.aydsii.demo.model.*;
+
+import java.time.LocalDate;
+import java.util.Arrays;
 
 @RestControllerAdvice
 public class ManejoErrores {
+
+    // Se dispara cuando un parámetro de la URL no se puede convertir al tipo
+    // esperado (ej: una fecha "31/11/2026" o un estado "pagadoo").
+    // Responde 400 con el ApiResponse del proyecto en vez del error de Spring.
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> tipoInvalido(MethodArgumentTypeMismatchException e) {
+        int status = HttpStatus.BAD_REQUEST.value();
+        Class<?> tipo = e.getRequiredType();
+        String mensaje;
+        if (tipo == LocalDate.class) {
+            mensaje = e.getName() + ": formato de fecha inválido (" + e.getValue() + "), use DD-MM-AAAA";
+        } else if (tipo != null && tipo.isEnum()) {
+            mensaje = e.getName() + ": valor inválido (" + e.getValue() + "), valores posibles: "
+                    + Arrays.toString(tipo.getEnumConstants());
+        } else {
+            mensaje = e.getName() + ": valor inválido (" + e.getValue() + ")";
+        }
+        return ResponseEntity.status(status).body(ApiResponse.error(status, mensaje));
+    }
 
     // captua cuando se lanza de alguna fomra clientenoencontrado, que recupera el
     // mensaje generado en esa clase
