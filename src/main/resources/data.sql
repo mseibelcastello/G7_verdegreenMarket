@@ -28,14 +28,20 @@ VALUES ('30111222', 'Carla Vendedora', 'carla@verdegreen.com', 'VENDEDOR'),
 
 -- ---------------------------------------------------------------------
 -- PRODUCTOS
---   99 -> NO existe (CU-01: 404 producto inexistente)
+--   CU-03 (stock disponible = físico - reservado):
+--     1, 2, 6 -> disponibles
+--     3       -> stock bajo (25 - 5 = 20 disponibles)
+--     4       -> sin stock (físico 0)
+--     5       -> sin stock (todo reservado: 30 - 30 = 0)
+--   99 -> NO existe (CU-01 / CU-03: 404 producto inexistente)
 -- ---------------------------------------------------------------------
 INSERT IGNORE INTO productos (codigo, nombre, descripcion, categoria, precio_pack, unidades_pack, stock_fisico, stock_reservado, stock_minimo, estado)
 VALUES (1, 'Vaso PET 250cc', 'Pack 10 un.', 'Vasos', 4500, 10, 100, 0, 20, 'DISPONIBLE'),
-       (2, 'Bandeja telgopor 103', 'Pack 50 un.', 'Bandejas', 6200, 50, 80, 0, 15, 'DISPONIBLE'),
-       (3, 'Bandeja aluminio F70', 'Pack 20 un.', 'Bandejas', 8900, 20, 60, 0, 10, 'DISPONIBLE'),
-       (4, 'Bolsa camiseta 40x50', 'Pack 100 un.', 'Bolsas', 3200, 100, 12, 0, 20, 'STOCK_BAJO'),
-       (5, 'Film stretch 50cm', 'Rollo 300 m', 'Films', 12500, 1, 0, 0, 5, 'SIN_STOCK');
+       (2, 'Vaso PET 500cc', 'Pack 10 un.', 'Vasos', 6800, 10, 80, 0, 20, 'DISPONIBLE'),
+       (3, 'Bandeja PET 500g', 'Pack 8 un.', 'Bandejas', 5200, 8, 25, 5, 20, 'STOCK_BAJO'),
+       (4, 'Clamshell PET 750cc', 'Pack 8 un.', 'Contenedores', 7400, 8, 0, 0, 10, 'SIN_STOCK'),
+       (5, 'Clamshell PET 1000cc', 'Pack 8 un.', 'Contenedores', 8900, 8, 30, 30, 10, 'SIN_STOCK'),
+       (6, 'Tapa PET para vaso', 'Pack 20 un.', 'Otros', 3200, 20, 200, 0, 40, 'DISPONIBLE');
 
 -- ---------------------------------------------------------------------
 -- PROMOCIONES (CU-01)
@@ -44,7 +50,7 @@ VALUES (1, 'Vaso PET 250cc', 'Pack 10 un.', 'Vasos', 4500, 10, 100, 0, 20, 'DISP
 -- tiene que fallar; con los productos 2 y 3 (ejemplo de Swagger) no.
 -- ---------------------------------------------------------------------
 INSERT IGNORE INTO promociones (id, nombre, tipo, valor, cantidad_minima, fecha_inicio, fecha_fin, estado, usuario_interno_dni)
-VALUES (1, 'Promo Bolsas', 'PORCENTAJE', 10, NULL, '2026-11-01', '2026-11-30', 'VIGENTE', '30111222');
+VALUES (1, 'Promo Clamshell', 'PORCENTAJE', 10, NULL, '2026-11-01', '2026-11-30', 'VIGENTE', '30111222');
 
 INSERT IGNORE INTO promocion_producto (promociones_id, productos_codigo)
 VALUES (1, 4);
@@ -81,7 +87,9 @@ UPDATE pedidos SET motivo_cancelacion = 'Pedido duplicado' WHERE id = 2;
 -- ---------------------------------------------------------------------
 -- DETALLE DE PEDIDOS (CU-04)
 -- subtotal = cantidad x precio_unitario - descuento_aplicado (en pesos)
---   pedido 3, línea 3: precio 6000 aunque hoy el producto 2 vale 6200 (RN-21)
+--   los precios son los del momento de la compra: no coinciden con el
+--   precio actual del producto (RN-21). Ej: pedido 3, línea 3 se pagó a
+--   6000 aunque hoy el producto 2 vale 6800
 --   pedido 3, línea 4: 2 x 8900 - 1780 = 16020
 --   pedido 4, línea 5: 5 x 3000 - 1500 = 13500
 -- ---------------------------------------------------------------------

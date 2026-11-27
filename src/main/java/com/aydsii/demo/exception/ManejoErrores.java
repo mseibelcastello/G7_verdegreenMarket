@@ -93,6 +93,21 @@ public class ManejoErrores {
         return ResponseEntity.status(status).body(ApiResponse.error(status, e.getMessage()));
     }
 
+    // el producto no tiene stock disponible y no se puede agregar al carrito.
+    @ExceptionHandler(ProductoSinStockException.class)
+    public ResponseEntity<ApiResponse<Void>> productoSinStock(ProductoSinStockException e) {
+        int status = HttpStatus.CONFLICT.value();
+        return ResponseEntity.status(status).body(ApiResponse.error(status, e.getMessage()));
+    }
+
+    // la cantidad pedida, sumada a la que ya hay en el carrito, supera el stock
+    // disponible.
+    @ExceptionHandler(StockInsuficienteException.class)
+    public ResponseEntity<ApiResponse<Void>> stockInsuficiente(StockInsuficienteException e) {
+        int status = HttpStatus.CONFLICT.value();
+        return ResponseEntity.status(status).body(ApiResponse.error(status, e.getMessage()));
+    }
+
     // Se dispara cuando falla alguna anotación de validación (@NotBlank, @Pattern,
     // @NotNull...)
     // en un @RequestBody marcado con @Valid. Responde 400 con el mensaje del primer
