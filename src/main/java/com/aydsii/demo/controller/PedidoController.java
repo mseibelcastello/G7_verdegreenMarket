@@ -72,9 +72,9 @@ public class PedidoController {
         @GetMapping("/historial")
         public ResponseEntity<ApiResponse<List<PedidoDetalleDTO>>> consultarHistorialPedidos(
                         @Parameter(description = "DNI del cliente") @RequestParam String dni,
-                        @Parameter(description = "Filtrar por estado (opcional)") @RequestParam(required = false) TipoEstado estado,
-                        @Parameter(description = "Desde esta fecha, formato DD-MM-AAAA (opcional)", example = "01-11-2026") @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy", fallbackPatterns = "yyyy-MM-dd") LocalDate desde,
-                        @Parameter(description = "Hasta esta fecha inclusive, formato DD-MM-AAAA (opcional)", example = "30-11-2026") @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy", fallbackPatterns = "yyyy-MM-dd") LocalDate hasta) {
+                        @Parameter(description = "Filtrar por estado") @RequestParam(required = false) TipoEstado estado,
+                        @Parameter(description = "Desde (formato DD-MM-AAAA)", example = "01-11-2026") @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy", fallbackPatterns = "yyyy-MM-dd") LocalDate desde,
+                        @Parameter(description = "Hasta (formato DD-MM-AAAA)", example = "30-11-2026") @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy", fallbackPatterns = "yyyy-MM-dd") LocalDate hasta) {
                 return ResponseEntity.ok(ApiResponse
                                 .ok(pedidoService.consultarHistorialPedidos(dni, estado, desde, hasta)));
         }
